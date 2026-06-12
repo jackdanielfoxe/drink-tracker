@@ -347,12 +347,17 @@ select:focus-visible {
 
 .board-card {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 0;
   padding: 14px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
+  transition: border-color 0.15s ease;
+}
+
+.board-card__summary {
+  gap: 14px;
 }
 
 .board-card--first {
@@ -424,6 +429,81 @@ select:focus-visible {
   font-size: 11px;
   opacity: 0.45;
   margin-top: 1px;
+}
+
+.board-card--expanded {
+  border-color: var(--color-deep-blue);
+}
+
+.board-card__summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+}
+
+.board-card__chevron {
+  font-size: 10px;
+  opacity: 0.4;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+.board-card__breakdown {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+  margin-top: 2px;
+}
+
+.breakdown__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.breakdown__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.breakdown__name {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.breakdown__stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-ink);
+  opacity: 0.65;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.breakdown__dot {
+  opacity: 0.4;
+}
+
+.breakdown__loading,
+.breakdown__empty {
+  font-size: 13px;
+  opacity: 0.55;
+  margin: 0;
 }
 
 /* My sessions */

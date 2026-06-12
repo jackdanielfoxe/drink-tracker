@@ -116,6 +116,39 @@ export async function deleteSession(sessionId) {
   if (error) throw error
 }
 
+// --- Drink breakdown for a single user ---
+export async function getUserDrinkBreakdown(userId) {
+  if (!userId) return []
+
+  const { data, error } = await supabase
+    .from('sessions')
+    .select(`
+      session_drinks ( drink_type_id, quantity, drink_types ( name, units ) )
+    `)
+    .eq('user_id', userId)
+
+  if (error) throw error
+
+  const totals = {}
+  for (const session of data ?? []) {
+    for (const sd of session.session_drinks ?? []) {
+      const id = sd?.drink_type_id
+      if (id == null) continue
+      const qty = Number(sd.quantity) || 0
+      const units = Number(sd.drink_types?.units) || 0
+      if (!totals[id]) {
+        totals[id] = { drinkTypeId: id, name: sd.drink_types?.name ?? 'Unknown', totalQuantity: 0, totalUnits: 0 }
+      }
+      totals[id].totalQuantity += qty
+      totals[id].totalUnits += qty * units
+    }
+  }
+
+  return Object.values(totals)
+    .map((d) => ({ ...d, totalUnits: Math.round(d.totalUnits * 10) / 10 }))
+    .sort((a, b) => b.totalUnits - a.totalUnits)
+}
+
 // --- Leaderboard: fetch + aggregate ---
 export async function getLeaderboard() {
   const { data: sessions, error } = await supabase
