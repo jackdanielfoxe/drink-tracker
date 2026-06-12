@@ -82,6 +82,67 @@ export async function submitSession(userId, date, drinkQuantities) {
   return session.id
 }
 
+// --- Fetch a single user's sessions, with their drinks ---
+export async function getUserSessions(userId) {
+  if (!userId) return []
+
+  const { data, error } = await supabase
+    .from('sessions')
+    .select(`
+      id,
+      session_date,
+      session_drinks ( id, drink_type_id, quantity, drink_types ( name ) )
+    `)
+    .eq('user_id', userId)
+    .order('session_date', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
+// --- Update an existing session's drinks (replace all rows) ---
+export async function updateSessionDrinks(sessionId, drinkQuantities) {
+  if (!sessionId) throw new Error('Missing session id.')
+
+  const rows = Object.entries(drinkQuantities ?? {})
+    .filter(([, qty]) => Number(qty) > 0)
+    .map(([drinkTypeId, qty]) => ({
+      session_id: sessionId,
+      drink_type_id: Number(drinkTypeId),
+      quantity: Number(qty),
+    }))
+
+  if (rows.length === 0) {
+    throw new Error('Add at least one drink before saving.')
+  }
+
+  // Remove existing drink rows for this session, then insert the new set.
+  const { error: deleteError } = await supabase
+    .from('session_drinks')
+    .delete()
+    .eq('session_id', sessionId)
+
+  if (deleteError) throw deleteError
+
+  const { error: insertError } = await supabase
+    .from('session_drinks')
+    .insert(rows)
+
+  if (insertError) throw insertError
+}
+
+// --- Delete a session entirely (cascades to its drink rows) ---
+export async function deleteSession(sessionId) {
+  if (!sessionId) throw new Error('Missing session id.')
+
+  const { error } = await supabase
+    .from('sessions')
+    .delete()
+    .eq('id', sessionId)
+
+  if (error) throw error
+}
+
 // --- Leaderboard: fetch + aggregate ---
 export async function getLeaderboard() {
   const { data: sessions, error } = await supabase
