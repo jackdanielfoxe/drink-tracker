@@ -15,7 +15,7 @@ create table sessions (
   user_id uuid references users(id) not null,
   session_date date not null,
   created_at timestamptz default now(),
-  unique (user_id, session_date)
+
 );
 
 create table session_drinks (

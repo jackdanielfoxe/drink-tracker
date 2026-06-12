@@ -11,21 +11,6 @@ export async function getUsers() {
   return data ?? []
 }
 
-// --- Check for existing submission ---
-export async function getExistingSession(userId, date) {
-  if (!userId || !date) return null
-
-  const { data, error } = await supabase
-    .from('sessions')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('session_date', date)
-    .maybeSingle()
-
-  if (error) throw error
-  return data // null if none exists
-}
-
 // --- Create session + drink rows ---
 export async function submitSession(userId, date, drinkQuantities) {
   if (!userId) throw new Error('Please select who you are.')
@@ -42,12 +27,6 @@ export async function submitSession(userId, date, drinkQuantities) {
     throw new Error('Add at least one drink before submitting.')
   }
 
-  // App-level duplicate check (fast feedback)
-  const existing = await getExistingSession(userId, date)
-  if (existing) {
-    throw new Error('A session already exists for this user and date.')
-  }
-
   // Create session row
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
@@ -55,13 +34,7 @@ export async function submitSession(userId, date, drinkQuantities) {
     .select('id')
     .single()
 
-  if (sessionError) {
-    // Postgres unique violation -> duplicate session (handles race conditions)
-    if (sessionError.code === '23505') {
-      throw new Error('A session already exists for this user and date.')
-    }
-    throw sessionError
-  }
+  if (sessionError) throw sessionError
 
   if (!session?.id) {
     throw new Error('Could not create session. Please try again.')

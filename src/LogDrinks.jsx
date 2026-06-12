@@ -170,7 +170,7 @@ export default function LogDrinks() {
         )}
 
         <button type="submit" className="btn btn--primary" disabled={submitting || usersLoading}>
-          {submitting ? 'Saving…' : 'Submit for the day'}
+          {submitting ? 'Saving…' : 'Log drinks'}
         </button>
       </form>
     </div>
