@@ -112,7 +112,7 @@ export default function LogDrinks() {
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="form">
+      <form id="log-form" onSubmit={handleSubmit} className="form">
         <div className="field">
           <label htmlFor="user">Who are you?</label>
           {usersError && (
@@ -168,11 +168,13 @@ export default function LogDrinks() {
             {status.message}
           </p>
         )}
-
-        <button type="submit" className="btn btn--primary" disabled={submitting || usersLoading}>
-          {submitting ? 'Saving…' : 'Log drinks'}
-        </button>
       </form>
+
+      <div className="sticky-submit">
+        <button type="submit" form="log-form" className="btn btn--primary btn--full" disabled={submitting || usersLoading}>
+          {submitting ? 'Saving…' : 'Log your drinks'}
+        </button>
+      </div>
     </div>
   )
 }

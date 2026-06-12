@@ -264,6 +264,18 @@ select:focus-visible {
   border: 1px solid var(--color-red);
 }
 
+.sticky-submit {
+  position: sticky;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  padding: 12px 20px;
+  background: linear-gradient(to top, var(--color-bg) 70%, transparent);
+  pointer-events: none;
+}
+
+.sticky-submit .btn {
+  pointer-events: all;
+}
+
 .btn {
   border: none;
   border-radius: var(--radius);
@@ -274,6 +286,10 @@ select:focus-visible {
   letter-spacing: 0.06em;
   cursor: pointer;
   font-family: var(--font-body);
+}
+
+.btn--full {
+  width: 100%;
 }
 
 .btn--primary {
