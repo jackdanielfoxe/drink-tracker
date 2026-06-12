@@ -34,7 +34,12 @@ export async function submitSession(userId, date, drinkQuantities) {
     .select('id')
     .single()
 
-  if (sessionError) throw sessionError
+  if (sessionError) {
+    if (sessionError.code === '23505') {
+      throw new Error('You've already logged a session for this date.')
+    }
+    throw sessionError
+  }
 
   if (!session?.id) {
     throw new Error('Could not create session. Please try again.')
