@@ -105,8 +105,11 @@ export default function LogDrinks() {
   return (
     <div className="page">
       <header className="page__header">
-        <p className="eyebrow">The Round</p>
-        <h1>Log your drinks</h1>
+        <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="logo" />
+        <div className="page__header-text">
+          <p className="eyebrow">Tit & Pecker</p>
+          <h1>Log your drinks</h1>
+        </div>
       </header>
 
       <form onSubmit={handleSubmit} className="form">

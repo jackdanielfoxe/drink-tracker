@@ -101,8 +101,11 @@ export default function MySessions() {
     return (
       <div className="page">
         <header className="page__header">
-          <p className="eyebrow">The Round</p>
-          <h1>My sessions</h1>
+          <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="logo" />
+          <div className="page__header-text">
+            <p className="eyebrow">Tit & Pecker</p>
+            <h1>My sessions</h1>
+          </div>
         </header>
         <p className="muted">Select your name on the Log screen first, then come back here.</p>
       </div>
@@ -112,8 +115,11 @@ export default function MySessions() {
   return (
     <div className="page">
       <header className="page__header">
-        <p className="eyebrow">The Round</p>
-        <h1>My sessions</h1>
+        <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="logo" />
+        <div className="page__header-text">
+          <p className="eyebrow">Tit & Pecker</p>
+          <h1>My sessions</h1>
+        </div>
       </header>
 
       {loading && <p className="muted">Loading your sessions…</p>}

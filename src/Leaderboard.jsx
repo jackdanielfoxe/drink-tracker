@@ -32,8 +32,11 @@ export default function Leaderboard() {
   return (
     <div className="page">
       <header className="page__header">
-        <p className="eyebrow">The Round</p>
-        <h1>Leaderboard</h1>
+        <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="logo" />
+        <div className="page__header-text">
+          <p className="eyebrow">Tit & Pecker</p>
+          <h1>Leaderboard</h1>
+        </div>
       </header>
 
       {loading && <p className="muted">Loading scores…</p>}
