@@ -123,7 +123,7 @@ export async function getLeaderboard() {
     .select(`
       user_id,
       users ( name ),
-      session_drinks ( drink_type_id, quantity, drink_types ( name ) )
+      session_drinks ( drink_type_id, quantity, drink_types ( name, units ) )
     `)
 
   if (error) throw error
@@ -140,6 +140,7 @@ export async function getLeaderboard() {
         name: session.users?.name ?? 'Unknown',
         totalSessions: 0,
         totalDrinks: 0,
+        totalUnits: 0,
         drinkCounts: {},
       }
     }
@@ -148,7 +149,9 @@ export async function getLeaderboard() {
 
     for (const sd of session.session_drinks ?? []) {
       const qty = Number(sd?.quantity) || 0
+      const units = Number(sd?.drink_types?.units) || 0
       stats[uid].totalDrinks += qty
+      stats[uid].totalUnits += qty * units
       const drinkName = sd?.drink_types?.name ?? 'Unknown'
       stats[uid].drinkCounts[drinkName] =
         (stats[uid].drinkCounts[drinkName] || 0) + qty
@@ -169,11 +172,12 @@ export async function getLeaderboard() {
       name: s.name,
       totalSessions: s.totalSessions,
       totalDrinks: s.totalDrinks,
+      totalUnits: Math.round(s.totalUnits * 10) / 10,
       topDrink: topDrink || '—',
     }
   })
 
-  leaderboard.sort((a, b) => b.totalDrinks - a.totalDrinks)
+  leaderboard.sort((a, b) => b.totalUnits - a.totalUnits)
 
   return leaderboard.map((row, i) => ({ ...row, rank: i + 1 }))
 }

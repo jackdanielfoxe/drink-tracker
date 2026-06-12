@@ -420,6 +420,12 @@ select:focus-visible {
   opacity: 0.6;
 }
 
+.board-card__sublabel {
+  font-size: 11px;
+  opacity: 0.45;
+  margin-top: 1px;
+}
+
 /* My sessions */
 
 .session-list {

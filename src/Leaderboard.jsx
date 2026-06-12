@@ -60,8 +60,9 @@ export default function Leaderboard() {
                 </div>
               </div>
               <div className="board-card__total">
-                <span className="board-card__count">{row.totalDrinks}</span>
-                <span className="board-card__label">drinks</span>
+                <span className="board-card__count">{row.totalUnits}</span>
+                <span className="board-card__label">units</span>
+                <span className="board-card__sublabel">{row.totalDrinks} drinks</span>
               </div>
             </div>
           ))}
