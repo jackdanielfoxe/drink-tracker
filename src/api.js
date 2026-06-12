@@ -36,7 +36,7 @@ export async function submitSession(userId, date, drinkQuantities) {
 
   if (sessionError) {
     if (sessionError.code === '23505') {
-      throw new Error('You've already logged a session for this date.')
+      throw new Error("You've already logged a session for this date.")
     }
     throw sessionError
   }
