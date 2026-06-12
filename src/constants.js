@@ -1,0 +1,15 @@
+export const DRINKS = [
+  { id: 1, name: 'Beer (pint)', icon: '🍺' },
+  { id: 2, name: 'Beer (half)', icon: '🍺' },
+  { id: 3, name: 'Beer (bottle 330ml)', icon: '🍺' },
+  { id: 4, name: 'Beer (bottle 660ml)', icon: '🍺' },
+  { id: 5, name: 'Beer (can)', icon: '🍺' },
+  { id: 6, name: 'Cider (pint)', icon: '🍏' },
+  { id: 7, name: 'Cider (half)', icon: '🍏' },
+  { id: 8, name: 'Cider (bottle)', icon: '🍏' },
+  { id: 9, name: 'Cider (can)', icon: '🍏' },
+  { id: 10, name: 'Wine (glass)', icon: '🍷' },
+  { id: 11, name: 'Spirit + Mixer', icon: '🥃' },
+  { id: 12, name: 'Shot', icon: '🥃' },
+  { id: 13, name: 'Cocktail', icon: '🍸' },
+]
