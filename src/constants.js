@@ -15,4 +15,6 @@ export const DRINKS = [
   { id: 14, name: 'Hard Seltzer (can)',  icon: '🧃', units: 1.4 },
   { id: 15, name: "Wright's Gin (150ml)", icon: '🍸', units: 6.0 },
   { id: 16, name: 'Alcopop (WKD/bottle)', icon: '🍹', units: 1.1 },
+  { id: 17, name: 'Prosecco (glass)',     icon: '🥂', units: 1.4 },
+  { id: 18, name: "Pimm's (glass)",       icon: '🍹', units: 1.0 },
 ]
