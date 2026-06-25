@@ -605,6 +605,8 @@ select:focus-visible {
 .accordion {
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--color-tan);
+  border-radius: var(--radius);
 }
 
 .accordion__header {
@@ -612,8 +614,8 @@ select:focus-visible {
   align-items: center;
   width: 100%;
   padding: 10px 14px;
-  background: var(--color-ink);
-  color: #E8D8C0;
+  background: var(--color-card);
+  color: var(--color-ink);
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
@@ -638,13 +640,14 @@ select:focus-visible {
 .accordion__tally {
   font-family: var(--font-mono);
   font-size: 16px;
-  color: var(--color-sky);
+  color: var(--color-tan);
 }
 
 .accordion__chevron {
   font-size: 12px;
   transition: transform 0.2s ease;
-  color: #E8D8C0;
+  color: var(--color-ink);
+  opacity: 0.5;
 }
 
 .accordion__chevron--open {
@@ -655,5 +658,5 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 8px 0 0;
+  padding: 8px 14px 14px;
 }
