@@ -599,3 +599,61 @@ select:focus-visible {
 .bottom-nav__icon {
   font-size: 20px;
 }
+
+/* Drink category accordions */
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion__header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--color-ink);
+  color: #E8D8C0;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  gap: 10px;
+  text-align: left;
+  min-height: 52px;
+}
+
+.accordion__header[aria-expanded="true"] {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.accordion__title {
+  flex: 1;
+}
+
+.accordion__tally {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--color-sky);
+}
+
+.accordion__chevron {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  color: #E8D8C0;
+}
+
+.accordion__chevron--open {
+  transform: rotate(180deg);
+}
+
+.accordion__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0 0;
+}

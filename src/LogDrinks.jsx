@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DRINKS } from './constants'
 import { dateString, formatNiceDate } from './dateUtils'
@@ -46,6 +46,26 @@ export default function LogDrinks() {
 
     loadUsers()
     return () => { active = false }
+  }, [])
+
+  const [openAccordions, setOpenAccordions] = useState({})
+
+  const toggleAccordion = useCallback((cat) => {
+    setOpenAccordions((prev) => ({ ...prev, [cat]: !prev[cat] }))
+  }, [])
+
+  const categorisedGroups = useMemo(() => {
+    const groups = {}
+    const flat = []
+    for (const drink of DRINKS) {
+      if (drink.category) {
+        if (!groups[drink.category]) groups[drink.category] = []
+        groups[drink.category].push(drink)
+      } else {
+        flat.push(drink)
+      }
+    }
+    return { groups, flat }
   }, [])
 
   const total = useMemo(
@@ -147,7 +167,39 @@ export default function LogDrinks() {
         <div className="field">
           <label>Drinks</label>
           <div className="drink-list">
-            {DRINKS.map((drink) => (
+            {Object.entries(categorisedGroups.groups).map(([cat, drinks]) => {
+              const isOpen = !!openAccordions[cat]
+              const groupTotal = drinks.reduce((sum, d) => sum + (quantities[d.id] ?? 0), 0)
+              return (
+                <div key={cat} className="accordion">
+                  <button
+                    type="button"
+                    className="accordion__header"
+                    onClick={() => toggleAccordion(cat)}
+                    aria-expanded={isOpen}
+                  >
+                    <span className="accordion__title">{cat}</span>
+                    {groupTotal > 0 && (
+                      <span className="accordion__tally">{groupTotal}</span>
+                    )}
+                    <span className={`accordion__chevron${isOpen ? ' accordion__chevron--open' : ''}`}>▼</span>
+                  </button>
+                  {isOpen && (
+                    <div className="accordion__body">
+                      {drinks.map((drink) => (
+                        <DrinkRow
+                          key={drink.id}
+                          drink={drink}
+                          quantity={quantities[drink.id] ?? 0}
+                          onChange={(val) => handleQuantityChange(drink.id, val)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            {categorisedGroups.flat.map((drink) => (
               <DrinkRow
                 key={drink.id}
                 drink={drink}
