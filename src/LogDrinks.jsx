@@ -3,17 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import { DRINKS } from './constants'
 import { dateString, formatNiceDate } from './dateUtils'
 import DrinkRow from './DrinkRow'
-import { submitSession, getUsers } from './api'
+import { submitSession, findRosterUser, getUnclaimedUsers, claimRosterUser } from './api'
+import { supabase } from './supabaseClient'
 
 const emptyQuantities = () =>
   DRINKS.reduce((acc, d) => ({ ...acc, [d.id]: 0 }), {})
 
 export default function LogDrinks() {
   const navigate = useNavigate()
-  const [users, setUsers] = useState([])
-  const [usersLoading, setUsersLoading] = useState(true)
-  const [usersError, setUsersError] = useState(null)
-  const [userId, setUserId] = useState(() => localStorage.getItem('roundUserId') || '')
+  const [identityLoading, setIdentityLoading] = useState(true)
+  const [authUser, setAuthUser] = useState(null) // { id, email, googleName }
+  const [userId, setUserId] = useState('')        // matched users.id, or '' if unlinked
+  const [displayName, setDisplayName] = useState('')
+  const [linked, setLinked] = useState(false)     // true once matched to a users row
+  const [unclaimed, setUnclaimed] = useState([])  // roster names available to claim
+  const [claimId, setClaimId] = useState('')      // selected name in the claim picker
+  const [claiming, setClaiming] = useState(false)
+  const [claimError, setClaimError] = useState(null)
   const [date, setDate] = useState(dateString(0))
   const [quantities, setQuantities] = useState(emptyQuantities)
   const [status, setStatus] = useState(null) // { type: 'success' | 'error', message }
@@ -22,31 +28,61 @@ export default function LogDrinks() {
   useEffect(() => {
     let active = true
 
-    async function loadUsers() {
-      setUsersLoading(true)
-      setUsersError(null)
+    async function loadIdentity() {
+      setIdentityLoading(true)
       try {
-        const data = await getUsers()
+        const { data: { user } } = await supabase.auth.getUser()
         if (!active) return
-        setUsers(data)
 
-        // If the saved user id no longer exists, clear it
-        const savedId = localStorage.getItem('roundUserId')
-        if (savedId && !data.some((u) => u.id === savedId)) {
-          localStorage.removeItem('roundUserId')
-          setUserId('')
-        }
-      } catch (err) {
+        const email = user?.email ?? ''
+        const googleName =
+          user?.user_metadata?.full_name ||
+          user?.user_metadata?.name ||
+          email ||
+          'there'
+        setAuthUser({ id: user?.id ?? null, email, googleName })
+
+        const match = await findRosterUser(user?.id ?? null, email)
         if (!active) return
-        setUsersError(err.message || 'Could not load users.')
+
+        if (match) {
+          setUserId(match.id)
+          setDisplayName(match.name)
+          setLinked(true)
+        } else {
+          // No roster match yet — show the claim picker so they can link.
+          setDisplayName(googleName)
+          setLinked(false)
+          const names = await getUnclaimedUsers()
+          if (!active) return
+          setUnclaimed(names)
+        }
       } finally {
-        if (active) setUsersLoading(false)
+        if (active) setIdentityLoading(false)
       }
     }
 
-    loadUsers()
+    loadIdentity()
     return () => { active = false }
   }, [])
+
+  const handleClaim = async () => {
+    if (!claimId || !authUser?.id) return
+    setClaiming(true)
+    setClaimError(null)
+    try {
+      const claimed = await claimRosterUser(claimId, authUser.id, authUser.email)
+      setUserId(claimed.id)
+      setDisplayName(claimed.name)
+      setLinked(true)
+    } catch (err) {
+      setClaimError(err?.message || 'Could not claim that name. Try again.')
+      // Refresh the available names in case the list changed.
+      try { setUnclaimed(await getUnclaimedUsers()) } catch { /* ignore */ }
+    } finally {
+      setClaiming(false)
+    }
+  }
 
   const [openAccordions, setOpenAccordions] = useState({})
 
@@ -73,16 +109,6 @@ export default function LogDrinks() {
     [quantities]
   )
 
-  const handleUserChange = (e) => {
-    const id = e.target.value
-    setUserId(id)
-    if (id) {
-      localStorage.setItem('roundUserId', id)
-    } else {
-      localStorage.removeItem('roundUserId')
-    }
-  }
-
   const handleQuantityChange = (drinkId, value) => {
     setQuantities((prev) => ({ ...prev, [drinkId]: Math.max(0, value) }))
   }
@@ -95,8 +121,8 @@ export default function LogDrinks() {
     e.preventDefault()
     setStatus(null)
 
-    if (!userId) {
-      setStatus({ type: 'error', message: 'Pick who you are first.' })
+    if (!linked || !userId) {
+      setStatus({ type: 'error', message: "Your account isn't linked yet, so we can't save this." })
       return
     }
     if (total === 0) {
@@ -134,26 +160,49 @@ export default function LogDrinks() {
 
       <form id="log-form" onSubmit={handleSubmit} className="form">
         <div className="field">
-          <label htmlFor="user">Who are you?</label>
-          {usersError && (
-            <p className="status status--error" role="alert">
-              Could not load users: {usersError}
+          <label>Who are you?</label>
+          {identityLoading ? (
+            <p className="status">Loading…</p>
+          ) : linked ? (
+            <p className="identity">
+              Logged in as <strong>{displayName}</strong>
             </p>
+          ) : (
+            <div className="claim">
+              <p className="claim__intro">
+                Welcome, {displayName}! Pick your name to link your account.
+              </p>
+              {unclaimed.length === 0 ? (
+                <p className="status status--error" role="alert">
+                  No roster names are available to claim. Ask the group admin to add you.
+                </p>
+              ) : (
+                <>
+                  <select
+                    value={claimId}
+                    onChange={(e) => setClaimId(e.target.value)}
+                    disabled={claiming}
+                  >
+                    <option value="" disabled>Select your name</option>
+                    {unclaimed.map((u) => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="btn btn--primary"
+                    onClick={handleClaim}
+                    disabled={!claimId || claiming}
+                  >
+                    {claiming ? 'Linking…' : 'This is me'}
+                  </button>
+                </>
+              )}
+              {claimError && (
+                <p className="status status--error" role="alert">{claimError}</p>
+              )}
+            </div>
           )}
-          <select
-            id="user"
-            value={userId}
-            onChange={handleUserChange}
-            required
-            disabled={usersLoading || !!usersError}
-          >
-            <option value="" disabled>
-              {usersLoading ? 'Loading…' : 'Select your name'}
-            </option>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>{u.name}</option>
-            ))}
-          </select>
         </div>
 
         <div className="field">
@@ -223,7 +272,7 @@ export default function LogDrinks() {
       </form>
 
       <div className="sticky-submit">
-        <button type="submit" form="log-form" className="btn btn--primary btn--full" disabled={submitting || usersLoading}>
+        <button type="submit" form="log-form" className="btn btn--primary btn--full" disabled={submitting || identityLoading || !linked}>
           {submitting ? 'Saving…' : 'Log your drinks'}
         </button>
       </div>

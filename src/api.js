@@ -11,6 +11,79 @@ export async function getUsers() {
   return data ?? []
 }
 
+// --- Resolve the roster row for the signed-in Google user ---
+// Matches on auth_id first, then falls back to a case-insensitive email
+// match. If matched by email but not yet linked, attaches their auth_id so
+// future logins resolve instantly. Returns the users row or null.
+export async function findRosterUser(authId, email) {
+  // 1. Already linked by auth_id?
+  if (authId) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name')
+      .eq('auth_id', authId)
+      .maybeSingle()
+    if (error) throw error
+    if (data) return data
+  }
+
+  // 2. Pre-set email match? Emails are stored lowercased, so compare lowercased.
+  if (email) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, auth_id')
+      .eq('email', email.toLowerCase())
+      .maybeSingle()
+    if (error) throw error
+    if (data) {
+      if (!data.auth_id && authId) {
+        await supabase
+          .from('users')
+          .update({ auth_id: authId })
+          .eq('id', data.id)
+          .is('auth_id', null)
+      }
+      return { id: data.id, name: data.name }
+    }
+  }
+
+  return null
+}
+
+// --- Names still available to claim (no auth_id yet) ---
+export async function getUnclaimedUsers() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, name')
+    .is('auth_id', null)
+    .order('name', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
+
+// --- Claim a roster row as the signed-in user ---
+export async function claimRosterUser(userId, authId, email) {
+  if (!userId || !authId) throw new Error('Missing claim details.')
+
+  const { data, error } = await supabase
+    .from('users')
+    .update({ auth_id: authId, email: email ? email.toLowerCase() : null })
+    .eq('id', userId)
+    .is('auth_id', null) // guard: never overwrite an already-claimed row
+    .select('id, name')
+    .maybeSingle()
+
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('That name was just taken. Pick another.')
+    }
+    throw error
+  }
+  if (!data) throw new Error('That name was just claimed by someone else.')
+  return data
+}
+
 // --- Create session + drink rows ---
 export async function submitSession(userId, date, drinkQuantities) {
   if (!userId) throw new Error('Please select who you are.')
