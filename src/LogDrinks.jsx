@@ -161,51 +161,49 @@ export default function LogDrinks() {
       </header>
 
       <form id="log-form" onSubmit={handleSubmit} className="form">
-        <div className="field">
-          <label>Who are you?</label>
-          {identityLoading ? (
-            <p className="status">Loading…</p>
-          ) : linked ? (
-            <p className="identity">
-              Logged in as <strong>{displayName}</strong>
-            </p>
-          ) : (
-            <div className="claim">
-              <p className="claim__intro">
-                Welcome, {displayName}! Pick your name to link your account.
-              </p>
-              {unclaimed.length === 0 ? (
-                <p className="status status--error" role="alert">
-                  No roster names are available to claim. Ask the group admin to add you.
+        {!linked && (
+          <div className="field">
+            <label>Who are you?</label>
+            {identityLoading ? (
+              <p className="status">Loading…</p>
+            ) : (
+              <div className="claim">
+                <p className="claim__intro">
+                  Welcome, {displayName}! Pick your name to link your account.
                 </p>
-              ) : (
-                <>
-                  <select
-                    value={claimId}
-                    onChange={(e) => setClaimId(e.target.value)}
-                    disabled={claiming}
-                  >
-                    <option value="" disabled>Select your name</option>
-                    {unclaimed.map((u) => (
-                      <option key={u.id} value={u.id}>{u.name}</option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    className="btn btn--primary"
-                    onClick={handleClaim}
-                    disabled={!claimId || claiming}
-                  >
-                    {claiming ? 'Linking…' : 'This is me'}
-                  </button>
-                </>
-              )}
-              {claimError && (
-                <p className="status status--error" role="alert">{claimError}</p>
-              )}
-            </div>
-          )}
-        </div>
+                {unclaimed.length === 0 ? (
+                  <p className="status status--error" role="alert">
+                    No roster names are available to claim. Ask the group admin to add you.
+                  </p>
+                ) : (
+                  <>
+                    <select
+                      value={claimId}
+                      onChange={(e) => setClaimId(e.target.value)}
+                      disabled={claiming}
+                    >
+                      <option value="" disabled>Select your name</option>
+                      {unclaimed.map((u) => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="btn btn--primary"
+                      onClick={handleClaim}
+                      disabled={!claimId || claiming}
+                    >
+                      {claiming ? 'Linking…' : 'This is me'}
+                    </button>
+                  </>
+                )}
+                {claimError && (
+                  <p className="status status--error" role="alert">{claimError}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="date">Which day?</label>
