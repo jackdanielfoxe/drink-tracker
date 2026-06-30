@@ -745,3 +745,13 @@ select:focus-visible {
   color: var(--color-ink);
   font-size: 15px;
 }
+
+/* Brand logo links back to the main site */
+.logo-link {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.auth-logo-link {
+  display: block;
+}

@@ -33,7 +33,9 @@ export default function Auth() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="auth-logo" />
+        <a className="auth-logo-link" href="https://titandpecker.com" aria-label="Tit & Pecker home">
+          <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="auth-logo" />
+        </a>
         <p className="eyebrow">Tit &amp; Pecker</p>
         <h1 className="auth-title">Drink Tracker</h1>
         <p className="auth-subtitle">Sign in to log your rounds.</p>
