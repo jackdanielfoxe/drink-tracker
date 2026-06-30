@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { DRINKS } from './constants'
 import { formatNiceDate } from './dateUtils'
 import DrinkRow from './DrinkRow'
-import { getUserSessions, updateSessionDrinks, deleteSession } from './api'
+import { getUserSessions, updateSessionDrinks, deleteSession, findRosterUser } from './api'
+import { supabase } from './supabaseClient'
 
 const quantitiesFromSession = (session) => {
   const q = DRINKS.reduce((acc, d) => ({ ...acc, [d.id]: 0 }), {})
@@ -15,10 +16,24 @@ const quantitiesFromSession = (session) => {
 }
 
 export default function MySessions() {
-  const [userId] = useState(() => localStorage.getItem('roundUserId') || '')
+  // null = still resolving the signed-in user; '' = signed in but no roster match
+  const [userId, setUserId] = useState(null)
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  // Resolve the signed-in Google user to their roster row (by auth_id, then
+  // email) — same matching LogDrinks uses.
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      const match = await findRosterUser(user?.id ?? null, user?.email ?? '')
+      if (!active) return
+      setUserId(match?.id ?? '')
+    })()
+    return () => { active = false }
+  }, [])
 
   const [editingId, setEditingId] = useState(null)
   const [editQuantities, setEditQuantities] = useState({})
@@ -27,6 +42,7 @@ export default function MySessions() {
   const [deletingId, setDeletingId] = useState(null)
 
   const load = useCallback(async () => {
+    if (userId === null) return // still resolving the signed-in user
     if (!userId) {
       setLoading(false)
       return
@@ -107,7 +123,11 @@ export default function MySessions() {
             <h1>My sessions</h1>
           </div>
         </header>
-        <p className="muted">Select your name on the Log screen first, then come back here.</p>
+        <p className="muted">
+          {userId === null
+            ? 'Loading…'
+            : 'We couldn’t find your linked account. Head to the Log screen to pick your name.'}
+        </p>
       </div>
     )
   }
