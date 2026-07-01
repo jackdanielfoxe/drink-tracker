@@ -82,6 +82,10 @@ export default function App() {
           <span className="bottom-nav__icon">🏆</span>
           <span>Leaderboard</span>
         </NavLink>
+        <a href="https://titandpecker.com/members" className="bottom-nav__item">
+          <span className="bottom-nav__icon">🏛️</span>
+          <span>Members</span>
+        </a>
         <button type="button" className="bottom-nav__signout" onClick={() => supabase.auth.signOut()}>
           Sign out
         </button>

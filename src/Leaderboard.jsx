@@ -52,7 +52,7 @@ export default function Leaderboard() {
   return (
     <div className="page">
       <header className="page__header">
-        <a className="logo-link" href="https://titandpecker.com" aria-label="Tit & Pecker home">
+        <a className="logo-link" href="https://titandpecker.com/members" aria-label="Back to Members">
           <img src="/images/tp-logo.png" alt="Tit & Pecker logo" className="logo" />
         </a>
         <div className="page__header-text">
