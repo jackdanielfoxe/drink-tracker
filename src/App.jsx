@@ -76,7 +76,7 @@ export default function App() {
         </NavLink>
         <NavLink to="/my-sessions" className={({ isActive }) => `bottom-nav__item ${isActive ? 'bottom-nav__item--active' : ''}`}>
           <span className="bottom-nav__icon">📝</span>
-          <span>My sessions</span>
+          <span>Sessions</span>
         </NavLink>
         <NavLink to="/leaderboard" className={({ isActive }) => `bottom-nav__item ${isActive ? 'bottom-nav__item--active' : ''}`}>
           <span className="bottom-nav__icon">🏆</span>
@@ -87,7 +87,8 @@ export default function App() {
           <span>Members</span>
         </a>
         <button type="button" className="bottom-nav__signout" onClick={() => supabase.auth.signOut()}>
-          Sign out
+          <span className="bottom-nav__icon">🚪</span>
+          <span>Sign out</span>
         </button>
       </nav>
     </div>
